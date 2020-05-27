@@ -1,0 +1,3 @@
+rootProject.name='EditTextValidator'
+include ':app'
+include ':validator'
