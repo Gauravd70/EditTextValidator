@@ -30,7 +30,7 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     private String errorMessage,regex;
     private boolean valid;
     private int checkType,timeOut,compareToId,helperTextSize,helperTextColor,drawablePosition;
-    private Drawable originalBackground,validBackground,invalidBackground,validDrawable,invalidDrawable;
+    private Drawable originalBackground,validBackground,invalidBackground,originalDrawable,validDrawable,invalidDrawable;
     private DrawableState drawableState;
     private Checker checker;
     private Subject<String,String> subject;
@@ -127,6 +127,7 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
         super.onAttachedToWindow();
         Log.d(TAG, "onAttachedToWindow: ");
         originalBackground=getBackground();
+        originalDrawable=getDrawable(R.color.transparent);
         drawableState= DrawableState.ORIGINAL;
         if(compareToId!=DEFAULT_VALUE) {
             View compareTo = ((View) getParent()).findViewById(compareToId);
@@ -197,7 +198,7 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
                 if(validDrawable!=null)
                     drawable=validDrawable;
                 else
-                    drawable=getDrawable(R.color.transparent);
+                    drawable=originalDrawable;
             }
             break;
             case INVALID: {
@@ -209,14 +210,15 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
                 if(invalidDrawable!=null)
                     drawable=invalidDrawable;
                 else
-                    drawable=getDrawable(R.color.transparent);
+                    drawable=originalDrawable;
             }
             break;
             default: {
                 if(originalBackground==null)
                     originalBackground=getBackground();
                 background = originalBackground;
-                drawable=getDrawable(R.color.transparent);
+
+                drawable=originalDrawable;
             }
         }
         this.drawableState=drawableState;
