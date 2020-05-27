@@ -125,7 +125,6 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Log.d(TAG, "onAttachedToWindow: ");
         originalBackground=getBackground();
         originalDrawable=getDrawable(R.color.transparent);
         drawableState= DrawableState.ORIGINAL;
@@ -256,7 +255,6 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
 
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            Log.d(TAG, "onTextChanged: ");
             if(drawableState!= DrawableState.ORIGINAL)
                 updateDrawableState(DrawableState.ORIGINAL);
             if(subject!=null)
