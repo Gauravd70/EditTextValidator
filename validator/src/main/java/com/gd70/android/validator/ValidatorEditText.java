@@ -197,7 +197,7 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
                 if(validDrawable!=null)
                     drawable=validDrawable;
                 else
-                    drawable=null;
+                    drawable=getDrawable(R.color.transparent);
             }
             break;
             case INVALID: {
@@ -209,14 +209,14 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
                 if(invalidDrawable!=null)
                     drawable=invalidDrawable;
                 else
-                    drawable=null;
+                    drawable=getDrawable(R.color.transparent);
             }
             break;
             default: {
                 if(originalBackground==null)
                     originalBackground=getBackground();
                 background = originalBackground;
-                drawable=null;
+                drawable=getDrawable(R.color.transparent);
             }
         }
         this.drawableState=drawableState;
