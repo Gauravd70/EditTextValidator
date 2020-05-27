@@ -2,15 +2,15 @@
 <resources>
     <declare-styleable name="ValidatorEditText">
         <attr name="errorMessage" format="string"/>
-        <attr name="checkType" format="integer">
-            <enum name="check_type:alpha" value="0"/>
-            <enum name="check_type:numeric" value="1"/>
-            <enum name="check_type:dob" value="2"/>
-            <enum name="check_type:phone_number" value="3"/>
-            <enum name="check_type:email" value="4"/>
-            <enum name="check_type:alphanumeric" value="5"/>
-            <enum name="check_type:username" value="6"/>
-            <enum name="check_type:password" value="7"/>
+        <attr name="checkType" format="string">
+            <enum name="alpha" value="0"/>
+            <enum name="numeric" value="1"/>
+            <enum name="dob" value="2"/>
+            <enum name="phone_number" value="3"/>
+            <enum name="email" value="4"/>
+            <enum name="alphanumeric" value="5"/>
+            <enum name="username" value="6"/>
+            <enum name="password" value="7"/>
         </attr>
         <attr name="validBackground" format="reference"/>
         <attr name="invalidBackground" format="reference"/>
