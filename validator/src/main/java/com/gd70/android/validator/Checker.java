@@ -1,5 +1,9 @@
 package com.gd70.android.validator;
 
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +29,7 @@ public class Checker {
     private SerializedSubject<String,String> inputBus;
     private Subscription checkSubscription;
 
-    public Subject<String,String> getSubject(){
+    Subject<String,String> getSubject(){
         return inputBus;
     }
 
@@ -34,11 +38,11 @@ public class Checker {
     }
     private CheckerInterface anInterface;
 
-    public Checker(ValidatorEditText editText, String regex, int timeOut) {
+    Checker(ValidatorEditText editText, String regex, int timeOut) {
         init(editText,DEFAULT_VALUE,regex,timeOut);
     }
 
-    public Checker(ValidatorEditText editText, int checkType, int timeOut) {
+    Checker(ValidatorEditText editText, int checkType, int timeOut) {
         init(editText,checkType,null,timeOut);
     }
 
@@ -94,16 +98,38 @@ public class Checker {
             this.regex=regex;
     }
 
-    public void subscribe() {
+    private boolean check(String s){
+        Pattern pattern=Pattern.compile(regex);
+        Matcher m=pattern.matcher(s);
+        return m.matches();
+    }
+
+    private boolean check(String s,String compareTo){
+        if(check(s))
+            return s.equals(compareTo);
+        return false;
+    }
+
+    void subscribe() {
         checkSubscription=inputBus.debounce(timeOut, TimeUnit.MILLISECONDS)
-                .subscribe(s1 -> {
-                    Pattern pattern=Pattern.compile(regex);
-                    Matcher m=pattern.matcher(s1);
-                    anInterface.onStateChanged(m.matches());
+                .subscribe(s -> anInterface.onStateChanged(check(s)));
+    }
+
+    void subscribe(View view){
+        checkSubscription=inputBus.debounce(timeOut,TimeUnit.MILLISECONDS)
+                .subscribe(s -> {
+                    String compareTo;
+                    if(view instanceof EditText)
+                        compareTo=((EditText)view).getText().toString();
+                    else if(view instanceof TextView)
+                        compareTo=((TextView)view).getText().toString();
+                    else
+                        compareTo="";
+                    anInterface.onStateChanged(check(s,compareTo));
                 });
     }
 
-    public void unsubscribe(){
+    void unsubscribe(){
         if(checkSubscription!=null)
             checkSubscription.unsubscribe();
     }

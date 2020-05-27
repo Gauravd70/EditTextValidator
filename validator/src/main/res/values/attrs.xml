@@ -2,6 +2,7 @@
 <resources>
     <declare-styleable name="ValidatorEditText">
         <attr name="errorMessage" format="string"/>
+
         <attr name="checkType" format="string">
             <enum name="alpha" value="0"/>
             <enum name="numeric" value="1"/>
@@ -12,10 +13,17 @@
             <enum name="username" value="6"/>
             <enum name="password" value="7"/>
         </attr>
+
         <attr name="validBackground" format="reference"/>
         <attr name="invalidBackground" format="reference"/>
+
         <attr name="useRegex" format="string"/>
+
         <attr name="timeOut" format="integer"/>
+
         <attr name="compareTo" format="reference"/>
+
+        <attr name="helperTextSize" format="integer"/>
+        <attr name="helperTextColor" format="reference"/>
     </declare-styleable>
 </resources>
