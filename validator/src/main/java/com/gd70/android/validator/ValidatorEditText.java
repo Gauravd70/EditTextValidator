@@ -129,6 +129,7 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
         originalBackground=getBackground();
         originalDrawable=getDrawable(R.color.transparent);
         drawableState= DrawableState.ORIGINAL;
+
         if(compareToId!=DEFAULT_VALUE) {
             View compareTo = ((View) getParent()).findViewById(compareToId);
             if(compareTo instanceof EditText)
@@ -140,6 +141,7 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
         else {
             checker.subscribe();
         }
+        this.addTextChangedListener(textWatcher);
     }
 
     @Override
@@ -151,16 +153,6 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         checker.unsubscribe();
-    }
-
-    @Override
-    protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
-        super.onTextChanged(text, start, lengthBefore, lengthAfter);
-        Log.d(TAG, "onTextChanged: ");
-        if(drawableState!= DrawableState.ORIGINAL)
-            updateDrawableState(DrawableState.ORIGINAL);
-        if(subject!=null)
-            subject.onNext(text.toString());
     }
 
     /*
@@ -214,10 +206,7 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
             }
             break;
             default: {
-                if(originalBackground==null)
-                    originalBackground=getBackground();
                 background = originalBackground;
-
                 drawable=originalDrawable;
             }
         }
@@ -253,6 +242,32 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     private int getColor(int resourceId){
         return ResourcesCompat.getColor(getResources(),resourceId,null);
     }
+
+    /*
+     *
+     * Text watcher for listening to validator edit text change
+     *
+     * */
+    private TextWatcher textWatcher =new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            Log.d(TAG, "onTextChanged: ");
+            if(drawableState!= DrawableState.ORIGINAL)
+                updateDrawableState(DrawableState.ORIGINAL);
+            if(subject!=null)
+                subject.onNext(charSequence.toString());
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
 
     /*
     *
