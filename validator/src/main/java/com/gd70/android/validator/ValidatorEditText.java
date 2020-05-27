@@ -79,8 +79,6 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     * */
     private void init(Context context,AttributeSet attrs,int defStyleAttr){
         valid=false;
-        originalDrawable=getBackground();
-        drawableState= DrawableState.ORIGINAL;
         getAttributes(context, attrs, defStyleAttr);
         initChecker();
     }
@@ -120,6 +118,8 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        originalDrawable=getBackground();
+        drawableState= DrawableState.ORIGINAL;
         if(compareToId!=DEFAULT_VALUE) {
             View compareTo = ((View) getParent()).findViewById(compareToId);
             if(compareTo instanceof EditText)
