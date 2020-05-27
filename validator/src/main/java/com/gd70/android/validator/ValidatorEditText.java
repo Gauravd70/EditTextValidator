@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -21,12 +22,15 @@ import rx.subjects.Subject;
 import static com.gd70.android.validator.Constants.DEFAULT_HELPER_TEXT_SIZE;
 import static com.gd70.android.validator.Constants.DEFAULT_TIMEOUT;
 import static com.gd70.android.validator.Constants.DEFAULT_VALUE;
+import static com.gd70.android.validator.Constants.LEFT;
+import static com.gd70.android.validator.Constants.RIGHT;
+import static com.gd70.android.validator.Constants.TAG;
 
 public class ValidatorEditText extends AppCompatEditText implements Checker.CheckerInterface {
     private String errorMessage,regex;
     private boolean valid;
-    private int checkType,timeOut,compareToId,helperTextSize,helperTextColor;
-    private Drawable originalDrawable,validDrawable,invalidDrawable;
+    private int checkType,timeOut,compareToId,helperTextSize,helperTextColor,drawablePosition;
+    private Drawable originalBackground,validBackground,invalidBackground,validDrawable,invalidDrawable;
     private DrawableState drawableState;
     private Checker checker;
     private Subject<String,String> subject;
@@ -92,8 +96,11 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
         TypedArray typedArray=context.obtainStyledAttributes(attrs, R.styleable.ValidatorEditText,defStyleAttr,0);
         errorMessage=typedArray.getString(R.styleable.ValidatorEditText_errorMessage);
         checkType=typedArray.getInt(R.styleable.ValidatorEditText_checkType,DEFAULT_VALUE);
-        validDrawable=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_validBackground,DEFAULT_VALUE));
-        invalidDrawable=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_invalidBackground,DEFAULT_VALUE));
+        validBackground=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_validBackground,DEFAULT_VALUE));
+        invalidBackground=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_invalidBackground,DEFAULT_VALUE));
+        validDrawable=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_validDrawable,DEFAULT_VALUE));
+        invalidDrawable=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_invalidDrawable,DEFAULT_VALUE));
+        drawablePosition=typedArray.getInt(R.styleable.ValidatorEditText_drawablePosition,RIGHT);
         regex=typedArray.getString(R.styleable.ValidatorEditText_useRegex);
         timeOut=typedArray.getInt(R.styleable.ValidatorEditText_timeOut,DEFAULT_TIMEOUT);
         compareToId=typedArray.getResourceId(R.styleable.ValidatorEditText_compareTo,DEFAULT_VALUE);
@@ -118,7 +125,8 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        originalDrawable=getBackground();
+        Log.d(TAG, "onAttachedToWindow: ");
+        originalBackground=getBackground();
         drawableState= DrawableState.ORIGINAL;
         if(compareToId!=DEFAULT_VALUE) {
             View compareTo = ((View) getParent()).findViewById(compareToId);
@@ -147,6 +155,7 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter);
+        Log.d(TAG, "onTextChanged: ");
         if(drawableState!= DrawableState.ORIGINAL)
             updateDrawableState(DrawableState.ORIGINAL);
         if(subject!=null)
@@ -166,27 +175,60 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
             updateDrawableState(DrawableState.INVALID);
     }
 
+    @Override
+    public void showToast(String toast) {
+
+    }
+
     /*
     *
     * update background and drawableState
     *
     * */
     private void updateDrawableState(DrawableState drawableState){
-        Drawable drawable;
+        Drawable background,drawable;
         switch (drawableState){
-            case VALID:
-                drawable=validDrawable;
+            case VALID: {
+                if(validBackground!=null)
+                    background = validBackground;
+                else
+                    background=originalBackground;
+
+                if(validDrawable!=null)
+                    drawable=validDrawable;
+                else
+                    drawable=null;
+            }
             break;
-            case INVALID:
-                drawable=invalidDrawable;
+            case INVALID: {
+                if(invalidBackground!=null)
+                    background = invalidBackground;
+                else
+                    background=originalBackground;
+
+                if(invalidDrawable!=null)
+                    drawable=invalidDrawable;
+                else
+                    drawable=null;
+            }
             break;
-            default:
-                drawable=originalDrawable;
+            default: {
+                if(originalBackground==null)
+                    originalBackground=getBackground();
+                background = originalBackground;
+                drawable=null;
+            }
         }
         this.drawableState=drawableState;
-        Observable.just(drawable)
+        Observable.just(this)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::setBackground);
+                .subscribe(editText -> {
+                    setBackground(background);
+                    if(drawablePosition==LEFT)
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(drawable,null,null,null);
+                    else
+                        setCompoundDrawablesRelativeWithIntrinsicBounds(null,null,drawable,null);
+                });
     }
 
     /*
@@ -198,7 +240,7 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
         if(resourceId!=DEFAULT_VALUE){
             return ResourcesCompat.getDrawable(getResources(),resourceId,null);
         }
-        return originalDrawable;
+        return originalBackground;
     }
 
     /*

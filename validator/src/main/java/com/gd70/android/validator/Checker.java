@@ -1,5 +1,6 @@
 package com.gd70.android.validator;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -21,6 +22,7 @@ import static com.gd70.android.validator.Constants.EMAIL;
 import static com.gd70.android.validator.Constants.NUMERIC;
 import static com.gd70.android.validator.Constants.PASSWORD;
 import static com.gd70.android.validator.Constants.PHONE;
+import static com.gd70.android.validator.Constants.TAG;
 import static com.gd70.android.validator.Constants.USERNAME;
 
 public class Checker {
@@ -34,6 +36,7 @@ public class Checker {
     }
 
     public interface CheckerInterface{
+        void showToast(String toast);
         void onStateChanged(boolean state);
     }
     private CheckerInterface anInterface;
@@ -99,9 +102,16 @@ public class Checker {
     }
 
     private boolean check(String s){
-        Pattern pattern=Pattern.compile(regex);
-        Matcher m=pattern.matcher(s);
-        return m.matches();
+        try {
+            Pattern pattern = Pattern.compile(regex);
+            Matcher m = pattern.matcher(s);
+            return m.matches();
+        }
+        catch (Exception e){
+            Log.d(TAG, "check: "+e);
+            anInterface.showToast("Invalid regular expression. Check Logs for more details");
+            return false;
+        }
     }
 
     private boolean check(String s,String compareTo){

@@ -17,6 +17,13 @@
         <attr name="validBackground" format="reference"/>
         <attr name="invalidBackground" format="reference"/>
 
+        <attr name="validDrawable" format="reference"/>
+        <attr name="invalidDrawable" format="reference"/>
+        <attr name="drawablePosition" format="string">
+            <enum name="left" value="0"/>
+            <enum name="right" value="1"/>
+        </attr>
+
         <attr name="useRegex" format="string"/>
 
         <attr name="timeOut" format="integer"/>
