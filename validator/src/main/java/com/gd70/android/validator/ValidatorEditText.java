@@ -2,7 +2,6 @@ package com.gd70.android.validator;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.core.content.res.ResourcesCompat;
@@ -18,16 +18,16 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subjects.Subject;
 
-import static com.gd70.android.validator.Constants.DEFAULT_HELPER_TEXT_SIZE;
 import static com.gd70.android.validator.Constants.DEFAULT_TIMEOUT;
 import static com.gd70.android.validator.Constants.DEFAULT_VALUE;
 import static com.gd70.android.validator.Constants.LEFT;
+import static com.gd70.android.validator.Constants.REQUIRED;
 import static com.gd70.android.validator.Constants.RIGHT;
 
 public class ValidatorEditText extends AppCompatEditText implements Checker.CheckerInterface {
     private String errorMessage,regex;
-    private boolean valid;
-    private int checkType,timeOut,compareToId,helperTextSize,helperTextColor,drawablePosition;
+    private boolean valid,required;
+    private int checkType,timeOut,compareToId,drawablePosition;
     private Drawable originalBackground,validBackground,invalidBackground,originalDrawable,validDrawable,invalidDrawable;
     private DrawableState drawableState;
     private Checker checker;
@@ -39,8 +39,12 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     *
     * */
     public boolean isValid() {
-        if(!valid)
-            updateDrawableState(DrawableState.INVALID);
+        if(required && getText()!=null) {
+            if(getText().toString().isEmpty()) {
+                updateErrorText(REQUIRED);
+                return false;
+            }
+        }
         return valid;
     }
 
@@ -93,17 +97,20 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     private void getAttributes(Context context, AttributeSet attrs, int defStyleAttr){
         TypedArray typedArray=context.obtainStyledAttributes(attrs, R.styleable.ValidatorEditText,defStyleAttr,0);
         errorMessage=typedArray.getString(R.styleable.ValidatorEditText_errorMessage);
+        required=typedArray.getBoolean(R.styleable.ValidatorEditText_required,false);
+
         checkType=typedArray.getInt(R.styleable.ValidatorEditText_checkType,DEFAULT_VALUE);
         validBackground=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_validBackground,DEFAULT_VALUE));
         invalidBackground=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_invalidBackground,DEFAULT_VALUE));
+
         validDrawable=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_validDrawable,DEFAULT_VALUE));
         invalidDrawable=getDrawable(typedArray.getResourceId(R.styleable.ValidatorEditText_invalidDrawable,DEFAULT_VALUE));
         drawablePosition=typedArray.getInt(R.styleable.ValidatorEditText_drawablePosition,RIGHT);
+
         regex=typedArray.getString(R.styleable.ValidatorEditText_useRegex);
         timeOut=typedArray.getInt(R.styleable.ValidatorEditText_timeOut,DEFAULT_TIMEOUT);
+
         compareToId=typedArray.getResourceId(R.styleable.ValidatorEditText_compareTo,DEFAULT_VALUE);
-        helperTextSize=typedArray.getInt(R.styleable.ValidatorEditText_helperTextColor,DEFAULT_HELPER_TEXT_SIZE);
-        helperTextColor=typedArray.getResourceId(R.styleable.ValidatorEditText_helperTextColor,getColor(R.color.holo_red_light));
         typedArray.recycle();
     }
 
@@ -120,6 +127,11 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
         subject=checker.getSubject();
     }
 
+    /*
+    *
+    * init helper textView
+    *
+    * */
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -142,11 +154,6 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     }
 
     @Override
-    protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
-        super.onFocusChanged(focused, direction, previouslyFocusedRect);
-    }
-
-    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         checker.unsubscribe();
@@ -159,15 +166,40 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     * */
     @Override
     public void onStateChanged(boolean state) {
+        valid=state;
         if(state)
             updateDrawableState(DrawableState.VALID);
-        else
+        else {
+            updateErrorText(errorMessage);
             updateDrawableState(DrawableState.INVALID);
+        }
     }
 
+    /*
+    *
+    * show toast
+    *
+    * */
     @Override
     public void showToast(String toast) {
+        Observable.just(toast)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(s-> Toast.makeText(getContext(),s,Toast.LENGTH_LONG).show());
+    }
 
+    /*
+    *
+    * update helper text
+    *
+    * */
+    private void updateErrorText(String text){
+        Observable.just(text)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::setError);
+    }
+
+    private void clearCompoundDrawables(){
+        addDrawable(null,null,null,null);
     }
 
     /*
@@ -176,68 +208,59 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
     *
     * */
     private void updateDrawableState(DrawableState drawableState){
-        Drawable background,drawable;
+        clearCompoundDrawables();
+        this.drawableState=drawableState;
+        Drawable[] drawables =new Drawable[2];
         switch (drawableState){
             case VALID: {
                 if(validBackground!=null)
-                    background = validBackground;
-                else
-                    background=originalBackground;
+                    drawables[0] = validBackground;
 
                 if(validDrawable!=null)
-                    drawable=validDrawable;
-                else
-                    drawable=originalDrawable;
+                    drawables[1]=validDrawable;
             }
             break;
             case INVALID: {
                 if(invalidBackground!=null)
-                    background = invalidBackground;
-                else
-                    background=originalBackground;
+                    drawables[0] = invalidBackground;
 
                 if(invalidDrawable!=null)
-                    drawable=invalidDrawable;
-                else
-                    drawable=originalDrawable;
+                    drawables[1]=invalidDrawable;
             }
             break;
             default: {
-                background = originalBackground;
-                drawable=originalDrawable;
+                drawables[0]=originalBackground;
+                drawables[1]=originalDrawable;
             }
         }
-        this.drawableState=drawableState;
-        Observable.just(this)
+
+        if(drawables[0]==null) {
+            drawables[0] = originalBackground;
+        }
+        if(drawables[1]==null) {
+            drawables[1] = originalDrawable;
+        }
+
+        Observable.just(drawables)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(editText -> {
-                    setBackground(background);
+                .subscribe(drawables1 -> {
+                    setBackground(drawables1[0]);
                     if(drawablePosition==LEFT)
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(drawable,null,null,null);
+                        addDrawable(drawables[1],null,null,null);
                     else
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(null,null,drawable,null);
+                        addDrawable(null,null,drawables[1],null);
                 });
     }
 
     /*
     *
-    * get drawable resource
+    * add compound drawable
     *
     * */
-    private Drawable getDrawable(int resourceId){
-        if(resourceId!=DEFAULT_VALUE){
-            return ResourcesCompat.getDrawable(getResources(),resourceId,null);
-        }
-        return originalBackground;
-    }
-
-    /*
-    *
-    * get color Resource
-    *
-    * */
-    private int getColor(int resourceId){
-        return ResourcesCompat.getColor(getResources(),resourceId,null);
+    private void addDrawable(Drawable start,Drawable top,Drawable end,Drawable bottom){
+        Observable.just(this)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(editText -> editText.setCompoundDrawablesRelativeWithIntrinsicBounds(start, top, end, bottom));
     }
 
     /*
@@ -255,8 +278,9 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             if(drawableState!= DrawableState.ORIGINAL)
                 updateDrawableState(DrawableState.ORIGINAL);
-            if(subject!=null)
+            if(subject!=null) {
                 subject.onNext(charSequence.toString());
+            }
         }
 
         @Override
@@ -287,4 +311,16 @@ public class ValidatorEditText extends AppCompatEditText implements Checker.Chec
 
         }
     };
+
+    /*
+     *
+     * get drawable resource
+     *
+     * */
+    private Drawable getDrawable(int resourceId){
+        if(resourceId!=DEFAULT_VALUE){
+            return ResourcesCompat.getDrawable(getResources(),resourceId,null);
+        }
+        return originalBackground;
+    }
 }
