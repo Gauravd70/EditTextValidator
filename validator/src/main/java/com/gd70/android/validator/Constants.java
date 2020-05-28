@@ -5,7 +5,7 @@ class Constants {
     static final String TAG="ValidatorEditText";
 
     //Defaults
-    static int DEFAULT_VALUE=-1;
+    static int DEFAULT_VALUE=0;
     static int DEFAULT_TIMEOUT=500;
     static int DEFAULT_HELPER_TEXT_SIZE=20;
 
