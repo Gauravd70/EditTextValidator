@@ -8,6 +8,7 @@ EditTextValidator is a library for Android which helps in input validation using
 * Can be used to **compare one Edittext with another**
 * Has **high flexibility** allowing the use of **custom ui components as backgrounds or drawables**  
 * Has **Timeout** feature which waits till the desired time before validation
+* **Provides automatic input validation** 
 
 ## Prerequisites
 1. The library makes use of Java8. Add the following to your app build.gradle if not present.
