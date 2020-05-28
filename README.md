@@ -1,5 +1,5 @@
 # EditTextValidator
-EditTextValidator is a library for Android which helps in input validation using regular expresions.
+EditTextValidator is a library for Android which helps in input validation using regular expressions.
 
 ## Features
 * **Easy** to use
