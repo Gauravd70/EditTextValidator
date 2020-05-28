@@ -113,7 +113,15 @@ dependencies{
                 app:compareTo="@id/password"/>
 ```
 
-10. To check for the validity on form submission you can use the following function
+10. **app:required=""** - mark a field as required
+```
+<com.gd70.android.validator.ValidatorEditText
+                .
+                .
+                app:required="true"/>
+```
+
+11. To check for the validity on form submission you can use the following function
 ```
 ValidatorEditText validatorEditText=findViewById(R.id.validatorText);
 if(validatorEditText.isValid()){
