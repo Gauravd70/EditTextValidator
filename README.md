@@ -33,7 +33,7 @@ allprojects {
 }
 ```
 
-2. Add the dependency to your app buil.gradle
+2. Add the dependency to your app build.gradle
 ```
 dependencies{
     implementation 'com.github.Gauravd70:EditTextValidator:1.0.1'
