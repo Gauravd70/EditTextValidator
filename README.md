@@ -113,6 +113,16 @@ dependencies{
                 app:compareTo="@id/password"/>
 ```
 
+10. To check for the validity on form submission you can use the following function
+```
+ValidatorEditText validatorEditText=findViewById(R.id.validatorText);
+if(validatorEditText.isValid()){
+  //valid
+}
+else{
+  //invalid
+}
+```
 
 ## How to use
 
