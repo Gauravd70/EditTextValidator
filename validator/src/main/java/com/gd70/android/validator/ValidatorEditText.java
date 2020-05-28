@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,7 +23,6 @@ import static com.gd70.android.validator.Constants.DEFAULT_TIMEOUT;
 import static com.gd70.android.validator.Constants.DEFAULT_VALUE;
 import static com.gd70.android.validator.Constants.LEFT;
 import static com.gd70.android.validator.Constants.RIGHT;
-import static com.gd70.android.validator.Constants.TAG;
 
 public class ValidatorEditText extends AppCompatEditText implements Checker.CheckerInterface {
     private String errorMessage,regex;
