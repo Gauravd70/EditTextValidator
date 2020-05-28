@@ -81,7 +81,7 @@ dependencies{
                 app:invalidDrawable="@drawable/invalidDrawable"/>
 ```
 
-6. **app:drawablePosition=""** - Location of the drawble inside the edittext. By default is **Right(end)** of the edittext
+6. **app:drawablePosition=""** - Location of the drawable inside the edittext. By default is **Right(end)** of the edittext
 ```
 <com.gd70.android.validator.ValidatorEditText
                 .
